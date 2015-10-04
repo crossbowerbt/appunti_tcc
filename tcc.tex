@@ -1,0 +1,908 @@
+ \documentclass[12pt]{article}
+
+% preamble for unicode (and also italian accented letters):
+%\usepackage{ucs,url}
+\usepackage[utf8]{inputenc}
+\usepackage[T1]{fontenc}
+
+% to include images
+\usepackage{graphicx}
+\graphicspath{ {./} }
+
+% to use URL links
+\usepackage{hyperref}
+
+% language stuff:
+\usepackage[italian]{babel}
+\selectlanguage{italian}
+
+\setcounter{secnumdepth}{0}
+
+% alignment:
+\raggedright
+
+% justify
+\usepackage[document]{ragged2e}
+
+% increase space between paragraph:
+\setlength{\parskip}{\baselineskip}
+
+% liste compatte:
+\usepackage{enumitem}
+\setlist{nolistsep}
+
+% Teoremi e definizioni:
+\usepackage{amsthm}
+\theoremstyle{definition}
+\newtheorem*{mydef}{Definizione}
+\newtheorem*{mytheo}{Teorema}
+\newtheorem*{myproof}{\em Dimostrazione}
+\newtheorem*{mynote}{Nota}
+
+% Simboli complessita` computazionale
+\usepackage[classfont=bold,
+  langfont=roman,
+  funcfont=italic]{complexity}
+
+% Math stuff
+\usepackage{amsmath}
+
+\begin{document}
+
+% title and author for an article document:
+\title{Appunti di Teoria della Calcolabilit\`{a} e Coplessit\`{a}}
+\author{Anonimo}
+\maketitle
+
+\justify
+
+\section{Capitolo 10}
+
+In questo capitolo si parla solo di problemi ricorsivi, chiedendosi non pi\`u
+se siano o meno calcolabili, ma esaminandone la complessit\`a. In particolare si
+dimostra l'{\em NP-completezza} di alcuni problemi.
+
+Per questi problemi si ritiene che una macchina di Turing polinomiale deterministica non esista,
+mentre ne esiste una polinomiale non deterministica che ne accetta il linguaggio.
+
+La procedura normalmente utilizzata per dimostrare l'NP-completezza di un problema
+consiste nel ridurre polinomialmente un problema noto, che si sa gi\`a essere NP-completo,
+al problema nuovo. Questo metodo presuppone l'esistenza di problemi NP-completi noti.
+
+Come prima cosa questo capitolo dimostrare l'NP-completezza di alcuni problemi di partenza,
+senza appoggiarci nessun problema noto.
+
+L'NP-completezza viene poi estesa ad altri problemi attraverso il metodo della riduzione polinomiale,
+fino ad avere un insieme di problemi NP-completi molto famosi, appartenenti a diverse discipline.
+
+\begin{mydef}[Riduzione polinomiale]
+Una riduzione si dice {\em polinomiale} se, data una istanza in input di lunghezza \(n\),
+il tempo impiegato dall'algoritmo per produrre l'istanza in output \`e poliniomiale rispetto a \(n\).
+\end{mydef}
+
+\begin{mynote}
+Chiaramente se la riduzione impiega {\em tempo} polinomiale per produrre il suo output,
+anche la {\em lunghezza} del suo output sar\`a polinomiale rispetto a l'intput. Questo perch\`e
+una TM non pu\`o accedere a pi\`u di una nuova cella di nastro per mossa.
+\end{mynote}
+
+\begin{mydef}[Problema NP-completo]
+Sia \(L\) un linguaggio. Diciamo che \(L\) \`e {\em NP-completo} se:
+
+\begin{enumerate}
+  \item \(L \in \NP\).
+  \item Per ogni \(L'\) in \NP\ esiste una riduzione polinomiale di \(L'\) a \(L\).
+\end{enumerate}
+
+\end{mydef}
+
+\begin{mytheo}
+Sia \(P_1\) un problema NP-completo e sia \(P_2\ \in \NP\).
+Se esiste una riduzione polinomiale di \(P_1\) a \(P_2\) allora \(P_2\) \`e NP-completo. 
+\end{mytheo}
+
+\begin{myproof}
+Per dimostrare che \(P_2\) \`e NP-completo dobbiamo dimostrare i due punti della definizione.
+
+Dato che per ipotesi \(P_2 \in \NP\) (punto 1), dobbiamo solo dimostrare che per ogni \(P \in \NP\)\ 
+esiste una riduzione polinomiale di \(P\) a \(P_2\) (punto 2).
+
+Sappiamo che per un generico \(P \in \NP\)\ esiste una riduzione polinomiale da \(P\) a \(P_1\),
+perch\`e \(P_1\) \`e NP-completo. Assumiamo la riduzione impieghi tempo \(p(n)\).
+
+Sappiamo inoltre che esiste una riduzione polinomiale da \(P_1\) a \(P_2\). Assumiamo impieghi tempo \(q(m)\).
+
+Costruiamo la nostra riduzione attraverso la composizione delle due precedenti.
+La riduzione ottenuta \`e in grado di trasformare istanze di \(P\) in istanze di \(P_2\)
+in tempo \(p(n) + q(p(n))\), pertanto \`e polinomiale.
+
+\hfill \qedsymbol
+\end{myproof}
+
+\begin{mytheo}
+Se un problema NP-completo \`e in \P, allora \(\P=\NP\).
+\end{mytheo}
+
+\begin{myproof}
+Sia \(P \in \P\)\ NP-completo.
+
+Allora per ogni \(P' \in \NP\)\ esiste una riduzione polinomiale da \(P'\) a \(P\).\newline
+Allora per ogni \(P' \in \NP\) vale anche \(P' \in \P\).
+
+\hfill \qedsymbol
+\end{myproof}
+
+I teoremi appena dimostrati si appoggiano sempre a un problema NP-completo gi\`a noto.
+Abbiamo quindi bisogno di almeno un problema NP-completo la cui dimostrazione non si basi su una riduzione.
+Questo ruolo sar\'a ricoperto da \SAT, un problema che andremo a definire qui di seguito
+
+Il problema \SAT\ consiste nel dire se una data espressione booleana \`e {\em soddisfacibile},
+ossia se esiste una particolare configurazione di valori di verit\`a per le variabili dell'espressione
+per le quali l'espressione risulta vera.
+
+Per capire come rappresentare istanze di \SAT\ dobbiamo chiarire come rappresentare espressioni booleane,
+per essere elaborate da una macchina di Turing.
+
+\begin{mynote}[Struttura delle espressioni booleane]
+Le espressioni booleane sono costituite a partire da:
+
+\begin{enumerate}
+  \item Variabili a valori booleani, ossia 1 (vero) e 0 (falso).
+  \item Gli operatori binari \(\land\) (and) e \(\lor\) (or).
+  \item L'operatore unario \(\lnot\) (not).
+  \item Le parentesi aperta e chiusa, per raggruppare sotto-espressioni.
+\end{enumerate}
+
+\end{mynote}
+
+\begin{mynote}[Alfabeto del linguaggio \SAT]
+L'alfabeto del linguaggio \SAT\ \`e costituito da 8 simboli:
+
+\begin{enumerate}
+  \item I simboli \(\land\), \(\lor\), \(\lnot\), \((\) e \()\), che rappresentano se stessi.
+  \item La variabile \(x_i\) \`e rappresentata dal simbolo \(x\) seguito dalla rappresentazione binaria di \(i\).
+        Gli indici usati vanno da 1 in su, e non possono essere saltati degli interi.
+\end{enumerate}
+
+\end{mynote}
+
+\begin{mynote}[Lunghezza delle espressioni codificate]
+La lunghezza di una espressione codificata \`e pari a circa il  numero di posizioni (occorrenze di variabili)
+dell'espressione originale.
+
+Se l'espressione ha \(m\) posizioni pu\`o avere al massimo \(m\) variabili distinte, di cui l'ultima avr\`a indice \(m\).
+La codifica di una variabile generica non richieder\`a quindi pi\`u di \(O(\log(m))\) simboli.
+
+Con \(m\) posizioni possiamo quindi avere una espressione lunga \(O(m\log(m))\) simboli,
+e la differenza tra \(m\) e \(m\log(m)\) \`e senz'altro limitata da un polinomio.
+\end{mynote}
+
+\begin{mytheo}[\textbf{\textit{Cook}}]
+\SAT\ \`e NP-completo.
+\end{mytheo}
+
+\begin{myproof}
+Dimostriamo che \(\SAT\ \in \NP\) illustrando una NTM che accetta \SAT:
+
+\begin{enumerate}
+  \item \textit{Parte non-deterministica:}
+    Una NTM pu\`o congetturare l'assegnamento di valori di verit\`a per le variabili dell'espressione data \(E\).
+    Se \(E\) ha lunghezza \(n\) questa fase richiede tempo \(O(n)\).
+
+    Questo perch\`e in \(n\) mosse la NTM pu\`o raggiungere \(2^n\) ID, corrispondenti ad altrettanti tentativi di assegnamento di valori di verit\`a
+    (ossia tutti quelli possibili per un espressione di \(n\) variabili distinte, potendo una variabile assumere solo due valori).\newline
+  
+  \item \textit{Parte deterministica:}
+    Dato un assegnamento di valori di verit\`a \(T\), dalla fase precedente, valutiamo se il valore di \(E\) risulta vero, ossia se \(E(T)=1\).
+    In tal caso accettiamo.
+    
+    Questa valutazione pu\`o essere fatta in tempo \(O(n^2)\) su una NTM multinastro, oppure \(O(n^4)\) su una NTM a nastro singolo.
+\end{enumerate}
+
+Dato che \SAT\ pu\`o essere accettato in tempo polinomiale da una NTM, \(\SAT\ \in \NP\).
+
+Dobbiamo ora dimostrare che per ogni \(P \in \NP\)\ esiste una riduzione polinomiale da \(P\) a \SAT.
+
+Scegliamo arbitrariamente \(P \in \NP\), e sia M la NTM a nastro singolo associata a \(P\).
+Sia \(w\) una istanza arbitraria di \(P\).
+Supponiamo inoltre che M non impieghi pi\`u di \(p(n)\) passi su un input di lunghezza \(n\).
+
+Senza perdere generalit\`a questa dimostrazione assume che M non scriva mai un simbolo di blank,
+e non sposti mai la testina a sinistra della posizione iniziale. Si assume inoltre che \(q_0\) sia lo stato
+iniziale di M e che \(q_1\) sia il suo unico stato finale.
+
+Ideeremo qui di seguito un algoritmo polinomiale per trasformare l'istanza \(w\) di \(P\) in un
+istanza di \SAT, avente come input M e \(w\).
+
+Essendo \(P\) un problema generico, possiamo solo dire che se M accetta \(w\), allora eseguir\`a
+una serie di transizioni partendo dallo stato iniziale fino ad arrivare allo stato accettante.
+Queste transizioni, insieme al contenuto del nastro, possono essere descritte da una serie di ID: \[
+\alpha_0 \vdash \alpha_1 \vdash \alpha_2 \vdash \ldots \vdash \alpha_{p(n)}
+\] dove \(\alpha_0\) descrive la situazione di partenza e \(\alpha_{p(n)}\) \`e una ID accettante.
+
+Possiamo immaginare queste ID strutturate in una tabella di dimensione \(p(n) \times p(n)\),
+in quanto il numero di mosse eseguite da M nel caso peggiore sono p(n), e cosi la lunghezza della sequenza di ID.
+La lunghezza massima di una ID \`e anch'essa di p(n) posizioni.
+
+Questa tabella avr\`a quindi la forma seguente:
+
+
+\begin{table}[!ht]
+\centering
+\begin{tabular}{l|l|l|l|l|l|l|l|l|}
+\cline{2-9}
+ \(\alpha_0\) & \(X_{00}\) & \(X_{01}\) &  &  &  &  & & \(X_{0p(n)}\) \\ \cline{2-9} 
+ \(\alpha_1\) & \(X_{10}\) & \(X_{11}\) &  &  &  &  & &  \(X_{1p(n)}\) \\ \cline{2-9} 
+ &  &  &  &  &  &  &  & \\ \cline{2-9} 
+ \(\alpha_i\) &  &  & \ \ \ &  \(X_{ij-1}\) & \(X_{ij}\) &  \(X_{ij+1}\) & \ \ \ & \\ \cline{2-9} 
+ \(\alpha_{i+1}\) &  &  & \ \ \ &  \(X_{i+1j-1}\) & \(X_{i+1j}\) &  \(X_{i+1j+1}\) & \ \ \ & \\ \cline{2-9}
+ &  &  &  &  &  &  &  &   \\ \cline{2-9}  
+ \(\alpha_{p(n)}\) & \(X_{p(n)0}\)  & \(X_{p(n)1}\)  &  &  &  &  &  &  \(X_{p(n)p(n)}\) \\ \cline{2-9}
+\end{tabular}
+\end{table}
+
+Indicheremo le posizioni nelle varie ID col nome di \(X_{ij}\), dove \(i\) indica il numero
+della ID, ossia la riga della tabella, mentre \(j\) indica la posizione nella ID, ossia la colonna della tabella.
+Queste variabili \(X_{ij}\) possono contenere uno stato di M oppure un simbolo di nastro.
+
+Dato che le istanze di \SAT\ sono espressioni booleane, non possiamo usare direttamente le variabili \(X_{ij}\)
+nell'espressione che andremo a costruire. Useremo le variabili \(X_{ij}\) solo come riferimento, e descriveremo
+il loro contenuto attraverso variabili booleane \(y_{ijz}\).
+
+Il significato di \(y_{ijz}\) \`e il seguente: \(y_{ijz}\) vale 1 se e solo se la variabile \(X_{ij}\) nella
+nostra tabella contiene \(z\), dove \(z\) pu\`o essere un simbolo di nastro o uno stato di M.
+
+Useremo queste variabili booleane per costruire una espressione finale avente forma: \[
+E_{M,w} = U \land S \land N \land F
+\] soddisfacibile se e solo se M accetta \(w\) entro \(p(n)\) mosse.
+Vedremo ora come costruire i vari componenti di questa espressione.
+
+\begin{description}
+
+  \item[\(U\): unicity]\ \newline
+
+    \(U\) \`e formato da l'AND logico di tutti i termini della forma \(\lnot(y_{ij\alpha} \land y_{ij\beta})\)
+    con \(\alpha \neq \beta \). Il numero di termini \`e \(O(p^2(n))\). \newline
+
+    Questa espressione impedisce che ogni posizione in ogni ID contenga pi\`u di un simbolo.
+    \newline
+
+  \item[\(S\): start ID]\ \newline
+
+    Questa espressione vincola la ID iniziale. La ID iniziale deve avere come primo simbolo \(q_0\),
+    lo stato iniziale, cui devono seguire i simboli di \(w = a_1a_2a_3 \ldots a_n\). Le posizioni rimanenti
+    devono contenere il simbolo di blank \(B\). \newline
+
+    L'espressione utilizzata per \(S\) \`e la seguente: \[
+    S = y_{00q_0} \land y_{01a_1} \land y_{02a_2} \land \ldots y_{0na_n} \land y_{0n+1B} \land \ldots y_{0p(n)B}
+    \]
+
+    La lunghezza di \(S\) \`e \(O(p(n))\).
+    \newline
+
+  \item[\(F\): final ID]\ \newline
+
+    Questa espressione verifica che lo stato della ID finale, in posizione \(p(n)\),
+    sia accettante.
+    \newline
+
+    Ricordiamo che abbiamo assunto per M un solo stato finale accettante \(q_1\).
+    Assumiamo inoltre che se lo stato \(q_1\) \`e raggiunto in una ID precedente all'ultima,
+    questa ID finale viene ripetuta senza alterazioni fino alla posizione \(p(n)\).
+    \newline
+
+    \(F\) \`e l'OR logico di \(p(n)\) variabili:\[
+    F = y_{p(n)0q_1} \lor y_{p(n)1q_1} \lor y_{p(n)2q_1} \lor \ldots y_{p(n)p(n)q_1}
+    \]
+
+    La lunghezza di \(F\) \`e \(O(p(n))\).
+    \newline
+
+  \item[\(N\): next ID]\ \newline
+
+    L'espressione \(N\) assicura che, partendo da una ID valida, la ID successiva sia anch'essa valida.
+    \newline
+    
+    \(N\) \`e formata da l'AND logico di una serie di espressioni \(N_i\), con \(i = 0,1,2,\ldots,p(n)-1\).
+    Ogni \(N_i\) garantisce che \(\alpha_{i+1}\) sia una delle ID valide che possono seguire a \(\alpha_i\) in M.
+    \newline
+
+    Le espressioni \(N_i\) si suddividono a loro volta in due sotto-espressioni:\[
+    N_i = A_{ij} \lor B_{ij}
+    \] con \(j = 0,1,2,\ldots,p(n)\). \newline
+
+    L'espressione \(B_{ij}\) \`e cosi formata: \[
+    \begin{aligned}
+    B_{ij} = &(y_{ijz_1} \land y_{i+1jz_1}) \lor (y_{ijz_2} \land y_{i+1jz_2}) \lor \ldots \lor (y_{ijz_r} \land y_{i+1jz_r})\ \lor \\
+    &(y_{ij-1q_1} \lor y_{ij-1q_2} \lor \ldots \lor y_{ij-1q_m})\ \lor \\
+    &(y_{ij+1q_1} \lor y_{ij+1q_2} \lor \ldots \lor y_{ij+1q_m})
+    \end{aligned}
+    \] dove \(q_1,q_2,\ldots,q_m\) sono gli stati di M, e \(z_1,z_2,\ldots,z_r\) sono i simboli di nastro.\newline
+
+    La prima riga della formula di \(B_{ij}\) verifica se la posizione \(X_{ij}\) nella ID \(\alpha_i\)
+    contiene un simbolo di nastro, e in tal caso verifica che questo simbolo venga trascritto
+    senza modifiche nella stella posizione della ID successiva. \newline
+
+    Le ultime due righe della formula per \(B_{ij}\) consentono un eccezione a quanto appena detto:
+    se una delle due posizioni adiacenti (\(X_{ij-1}\) e \(X_{ij+1}\)) a quella del simbolo analizzato (\(X_{ij}\))
+    contiene uno stato invece che un simbolo di nastro, queste sotto espressioni rendono vera \(B_{ij}\). \newline
+
+    Nel caso invece che \(X_{ij}\) contenga uno stato, la sotto-espressione \(B_{ij}\) risulter\`a falsa, e sar\`a` compito
+    di \(A_{ij}\) rendere l'espressione vera.
+
+    \`E da notare che per i casi \(B_{i0}\) e \(B_{ip(n)}\) sono necessarie alcune piccole modifiche: descrivendo
+    queste i limiti di una ID alcune posizioni non sono accessibili. Lasciamo le modifiche allo studente. \newline
+
+    Abbiamo detto che se uno stato \`e adiacente a un simbolo di nastro in una ID, quella parte di ID pu\`o non
+    essere trascritta immutata nella ID successiva. In generale \`e possibile conoscere il simbolo \(X_{i+1j}\)
+    nella ID \(\alpha_i+1\), osservando i tre simboli sopra di esso (\(X_{ij-1}\), \(X_{ij}\) e \(X_{ij+1}\)). \newline
+
+    La porzione di ID interessata \`e illustrata dalla tabella seguente:
+    \begin{table}[!ht]
+      \centering
+      \begin{tabular}{lllllll}
+        \cline{2-6}
+        \multicolumn{1}{l}{\(\alpha_i\)} & \multicolumn{1}{|l|}{\ldots} & \multicolumn{1}{l|}{\(X_{ij-1}\)} & \multicolumn{1}{l|}{\(X_{ij}\)} & \multicolumn{1}{l|}{\(X_{ij+1}\)} & \multicolumn{1}{l|}{\ldots} &  \\ \cline{2-6}
+        \multicolumn{1}{l}{\(\alpha_{i+1}\)} & \multicolumn{1}{|l|}{\ldots} & \multicolumn{1}{l|}{\(X_{i+1j-1}\)} & \multicolumn{1}{l|}{\(X_{i+1j}\)} & \multicolumn{1}{l|}{\(X_{i+1j+1}\)} & \multicolumn{1}{l|}{\ldots} &  \\ \cline{2-6}
+        &                       &                       &                       &                       &  \\
+        &                       &                       &                       &                       &
+      \end{tabular}
+    \end{table}
+    
+    Se la posizione \(X_{ij}\) contiene uno stato \`e la sotto-espressione \(A_{ij}\) che
+    verifica la correttezza delle posizioni \(X_{i+1j-1}\), \(X_{i+1j}\) e \(X_{i+1j+1}\)
+    nella ID successiva. \newline
+
+    La forma di \(A_{ij}\) \`e un OR di termini, un termine per ogni insieme di sei variabili
+    che formano un assegnamento valido. Un assegnamento \`e valido se:\newline
+    \begin{enumerate}
+    \item \(X_{ij}\) \`e uno stato, ma \(X_{ij-1}\) e \(X_{ij+1}\) sono simboli di nastro.\newline
+    \item esiste una mossa in M per la quale \(X_{ij-1}\), \(X_{ij}\) e \(X_{ij+1}\) diventano \(X_{i+1j-1}\), \(X_{i+1j}\) e \(X_{i+1j+1}\).
+    \end{enumerate}
+    \ \newline
+    
+    Per esempio, supponiamo in M sia presente una transizione: \[
+    \delta(q_2,z_1) = (q_3, z_2, L)
+    \] \newline
+    
+    La sezione di nastro interessata subir\`a queste variazioni:
+    \begin{table}[!ht]
+      \centering
+      \begin{tabular}{lllllll}
+        \cline{2-6}
+        \multicolumn{1}{l}{\(\alpha_i\)} & \multicolumn{1}{|l|}{\ldots} & \multicolumn{1}{l|}{\(z_3\)} & \multicolumn{1}{l|}{\(q_2\)} & \multicolumn{1}{l|}{\(z_1\)} & \multicolumn{1}{l|}{\ldots} &  \\ \cline{2-6}
+        \multicolumn{1}{l}{\(\alpha_{i+1}\)} & \multicolumn{1}{|l|}{\ldots} & \multicolumn{1}{l|}{\(q_3\)} & \multicolumn{1}{l|}{\(z_3\)} & \multicolumn{1}{l|}{\(z_2\)} & \multicolumn{1}{l|}{\ldots} &  \\ \cline{2-6}
+        &                       &                       &                       &                       &  \\
+        &                       &                       &                       &                       &
+      \end{tabular}
+    \end{table}
+
+
+    Questo si traduce nell'espressione:\[
+    \begin{aligned}
+      &y_{ij-1z_3}\ \land\ y_{ijq_2}\ \land\ y_{ij+1z_1}\ \land \\
+      &y_{i+1jq_3}\ \land\ y_{i+1j-1z_3}\ \land\ y_{i+1j+1z_2}
+    \end{aligned}
+    \]\ \newline
+
+    In modo simmetrico \`e possibile costruire l'espressione nel caso la transizione
+    muova la testina a destra e non a sinistra. Inoltre, come per le \(B_{ij}\),
+    bisogna modificare leggermente le \(A_{ij}\) che descrivono situazioni ai limiti di una ID. \newline
+
+    \(A_{ij}\) \`e formato da l'OR logico di tutte le espressioni aventi la forma illustrata forma,
+    che descrivono una possibile transizione di M. \newline
+
+    Per quanto riguarda la lunghezza di \(A_{ij}\) e \(B_{ij}\), questa pu\`o essere molto
+    grande per macchine con numerosi stati e simboli di nastro, ma resta costante rispetto alla
+    lunghezza dell'input \(w\).\newline
+
+    Di conseguenza la lunghezza di \(N_i\) \`e \(O(p(n)\), mentre quella di \(N\) \`e \(O(p^2(n)\).
+    \newline
+\end{description}
+
+Abbiamo descritto come convertire una istanza di un arbitrario \(P \in \NP\) in una espressione
+istanza di \SAT di forma:\[
+E_{M,w} = U \land S \land N \land F 
+\] Questa espressione dipende sia da M che da \(w\), anche se solo \(S\) dipende direttamente da \(w\),
+mentre le altre parti dipendono solo da M de dalla lunghezza di \(w\).
+
+Quindi per ogni NTM che gira in tempo polinomiale \(p(n)\) possiamo ideare un algoritmo che prende un input
+\(w\) di lunghezza n e produce \(E_{M,w}\). Il tempo di esecuzione su una TM deterministica multinastro
+\`e di \(O(p^2(n))\), convertibile in una TM a nastro singolo che impiega un tempo \(O(p^4(n)\).
+
+L'output dell'algoritmo \`e un espressione booleana soddisfacibile se e solo se M accetta l'input \(w\).
+Quindi \SAT\ \`e NP-completo.
+
+\hfill \qedsymbol
+\end{myproof}
+
+Avendo aggiunto al nostro repertorio un problema NP-completo, possiamo dimostrare l'NP-completezza
+dei successivi problemi attraverso riduzioni polinomiali.
+
+Esiste per\`o un problema intermedio, detto 3\SAT, che spesso risulta pi\`u semplice da ridurre ad
+alcune classi di problemi rispetto a \SAT, perch\`e sfrutta espressioni aventi una forma molto precisa:
+congiunzioni logiche di clausole.
+
+Vedremo qui di seguito come dimostrare che 3\SAT \`e NP-completo, e quale sia con precisione il formato
+delle istanze di 3\SAT.
+
+\begin{mydef}[Letterale]
+  Un letterale \`e una variabile booleana o una variabile booleana negata (e.g. \(x_1\) o \(\lnot x_2\)).
+\end{mydef}
+
+\begin{mydef}[Clausola]
+  Una clausola \`e la disgiunzione logica di uno o pi\`u letterali (e.g. \((x_1 \lor \lnot x_2 \lor x_3)\)).
+\end{mydef}
+
+\begin{mydef}[Espressione in forma normale congiuntiva]
+  Una espressione booleana si dice in forma normale congiuntiva (CNF, conjunctive normal form) se
+  \`e la congiunzione logica di una o pi\`u clausole. \newline Un esempio di espressione in CNF
+  \`e \((x_1 \lor \lnot x_2 \lor x_3) \land x_4 \land (\lnot x_1 \lor x_2)\).
+\end{mydef}
+
+Per arrivare a 3\SAT ci appoggeremo a un problema intermedio, chiamato C\SAT. Per far questo dobbiamo
+ridurre le istanze di \SAT a C\SAT, che verifica la soddisfacibilit\`a di espressioni in forma normale congiuntiva.
+
+Sappiamo dalla logica che \`e sempre possibile convertire espressioni booleane generiche in espressioni
+equivalenti in CNF. Questo approccio per\`o, in alcuni casi, produce espressioni in CNF che sono esponenziali
+rispetto alla lunghezza delle espressioni generiche originali, e questo non \`e accettabile se si vuole
+ottenere una riduzione polinomiale.
+
+In realt\`a i vincoli che dobbiamo soddisfare sono meno forti: \`e` sufficiente convertire un istanza \(E\) di \SAT
+\ in un istanza \(F\) di C\SAT, tale che \(F\) sia soddisfacibile se e solo se anche \(E\) lo \`e.
+
+Questa \`e la strategia usata dalla riduzione che andremo a costruire.
+
+\begin{mytheo}
+  Per ogni espressione booleana \(E\) esiste una espressione booleana \(F\) in cui le
+  negazioni compaiono solo nei letterali.
+
+  Inoltre la lunghezza di \(F\) \`e lineare rispetto alla lunghezza di \(E\), ed \`e costruibile in
+  tempo polinomiale.
+\end{mytheo}
+
+\begin{myproof}
+  Dimostriamo il teorema per induzione sul numero di operatori di \(E\). Dimostriamo inoltre che
+  se \(E\) contiene \(n \geq 1\) operatori, l'espressione equivalente \(F\) ne contiene
+  al pi\`u \(2n-1\).
+
+  \begin{description}
+
+  \item[Base]
+    Se \(E\) contiene un solo operatore \`e gi\`a in CNF.\newline
+    
+  \item[Induzione]
+    Supponiamo l'enunciato sia vero per espressioni con meno operatori di \(E\). \newline
+
+    Rispetto all'operatore di livello pi\`u alto, la forma di \(E\) pu\`o essere:\newline
+
+    \begin{description}
+
+      \item[\(E = E_1 \lor E_2\)] Per ipotesi induttiva esistono \(F_1\) e \(F_2\), equivalenti a \(E_1\) e \(E_2\),
+        con negazioni solo nei letterali. Poniamo quindi \(F = F_1 \lor F_2\).\newline
+
+        Supponiamo \(E_1\) e \(E_2\) abbiano rispettivamente \(n_1\) e \(n_2\) operatori, e che quindi
+        \(E\) ne abbia \(n_1 + n_2 + 1\).\newline
+
+        Per ipotesi induttiva \(F_1\) e \(F_2\) ne hanno al massimo \(2n_1-1\) e \(2n_2 -1\).
+        Perci\`o \(F\) ne ha al massimo \(2(n_1 + n_2 + 1) - 1\).\newline
+
+      \item[\(E = E_1 \land E_2\)] Come visto sopra possiamo porre \(F = (F_1) \land (F_2)\). Anche
+        in questo caso \(F\) ha al massimo \(2(n_1 + n_2 + 1) - 1\) operatori.\newline
+
+      \item[\(E = \lnot E_1\)] Consideriamo allora l'operatore pi\`u esterno di \(E_1\):\newline
+
+        Se \(E_1 = \lnot E_2\) Allora \(E = \lnot(\lnot(E_2))\). Per ipotesi induttiva possiamo trovare una
+        \(F\) equivalente a \(E_2\) che rispetta l'enunciato.\newline
+
+        Se \(E_1 = E_2 \lor E_3\), allora per De Morgan, \(E = \lnot (E_2 \lor E_3) = \lnot (E_2) \land \lnot (E_3)\).\newline
+        
+        Sia \(\lnot(E_2)\) che  \(\lnot(E_3)\) per ipotesi induttiva hanno espressioni equivalenti \(F_2\) e \(F_3\) con
+        negazioni solo nei letterali. Poniamo quindi \(F = (F_2) \land (F_3)\).
+
+        Supponiamo \(E_2\) e \(E_3\) abbiano rispettivamente \(n_2\) e \(n_3\) operatori, e che quindi \(E\) ne abbia
+        \(n_2 + n_3 + 2\). Per ipotesi di induzione sappiamo che \(F_2\) e \(F_3\) ne hanno al massimo  \(2(n_2 + 1) - 1\) e \(2(n_3 + 1)-1\).
+        \newline
+
+        Quindi \(F\) non ne ha pi\`u di \(2n_2 + 2n_3 + 3 = 2(n_2 + n_3 + 2) - 1\).
+
+        Se infine \(E_1 = E_2 \land E_3\) si procede come nel caso precedente, applicando De Morgan.
+        
+    \end{description}
+
+  \end{description}
+
+  \hfill \qedsymbol
+\end{myproof}
+
+\begin{mytheo}
+  Sia \(E\) un espressione booleana di lunghezza \(n\), le cui negazioni compaiono solo nei letterali.
+  Allora esiste una espressione \(F\) tale che:
+
+  \begin{enumerate}
+    
+    \item \(F\) \`e in CNF ed \`e formata da non pi\`u di n clausole.
+
+    \item \(F\) si pu\`o costruire da \(E\) in tempo non superiore a \(c|E|^2\), con \(c\) costante.
+
+    \item un assegnamento di valori di verit\`a \(T\) rende \(E\) vera se e solo se \(T\) pu\`o essere esteso
+      a un assegnamento \(S\) che rende F vera.
+
+  \end{enumerate}
+\end{mytheo}
+
+\begin{myproof}
+  Per induzione sul numero di simboli di \(E\).
+
+  \begin{description}
+
+    \item[Base] se \(E\) ha al massimo due simboli allora \`e un letterale e soddisfa gi\`a l'enunciato. \newline
+
+    \item[Induzione] Ipotizziamo che ogni espressione pi\`u corta di \(E\) si possa convertire in un espressione
+      che rispetti l'enunciato.\newline
+
+      A seconda dell'operatore principale di \(E\) distinguiamo i seguenti casi:\newline
+
+      \begin{enumerate}
+        \item \(E = E_1 \land E_2\) Per ipotesi di induzione esistono due espressioni \(F_1\) e \(F_2\),
+          derivate rispettivamente da \(E_1\) e \(E_2\), che rispettano l'enunciato.\newline
+          Senza perdere generalit\`a assumiamo che gli insiemi di variabili di \(F_1\) e \(F_2\)
+          siano disgiunti, salvo per le variabili che figurano in \(E\). \newline
+          Costruiamo \(F\) come: \(F = F_1 \land F_2\).\newline
+          \(F\) \`e in CNF. Dobbiamo dimostrare che un assegnamento di valori di verit\`a \(T\) rende \(E\) vera
+          se e solo se pu\`o essere esteso ad \(S\) che rende \(F\) vera.\newline
+
+          \begin{enumerate}
+
+            \item Se \(T\) soddisfa \(E\) allora esiste \(S\) che soddisfa \(F\), con \(S\) estensione di \(T\):\newline
+              Sia \(T\) un assegnamento di valori di verit\`a che soddisfa \(E\). Siano \(T_1\) e \(T_2\) come \(T\),
+              ma ristretti a \(E_1\) e \(E_2\).\newline
+              Allora, per ipotesi induttiva, esistono \(S_1\) e \(S_2\), estensioni di \(T_1\) e \(T_2\), che soddisfano \(F_1\) e \(F_2\).\newline
+              Possiamo costuire \(S\) in accordo con \(S_1\) e \(S_2\), in quanto le variabili comuni di \(S_1\) e \(S_2\) hanno valori concordi.
+              Poich\`e \(F\) \`e l'AND di \(F_1\) e \(F_2\), \(S\) soddisfa \(F\).\newline
+
+            \item Se \(S\) soddisfa \(F\), allora esiste \(T\) che soddisfa \(E\), con \(S\) estensione di \(T\):\newline
+              Sia \(S\) un assegnamento di valori di verit\`a che soddisfa \(F\). Siano\(S_1\) e \(S_2\) le restrizioni di \(S\) rispettivamente
+              su \(F_1\) e \(F_2\).\newline
+              Per ipotesi induttiva esistono \(T_1\) e \(T_2\) che soddisfano rispettivamente \(E_1\) e \(E_2\), con \(S_1\) estensione di \(T_1\)
+              e \(S_2\) estensione di \(T_2\).\newline
+              Poich\`e \(F\) \`e l'AND di \(F_1\) e \(F_2\), allora \(S_1\) e \(S_2\) hanno variabili concordi. Allora anche \(T_1\) e \(T_2\) hanno
+              variabili comuni concordi.\newline
+              Possiamo allora costruire \(T\) in accordo a \(T_1\) e \(T_2\).\newline
+              Essendo \(E\) l'AND di \(E_1\) e \(E_2\), \(T\) soddisfa \(E\).\newline
+
+          \end{enumerate}
+
+        \item \(E = E_1 \lor E_2\) Per ipotesi induttiva esistono \(F_1\) e \(F_2\) che rispettano l'enunciato rispetto a \(E_1\) e \(E_2\).
+          Supponiamo \(F_1 = g_1 \land g_2 \land \ldots \land g_p\) e \(F_2 = h_1 \land h_2 \land \ldots \land h_q\), dove le \(g\) e le \(h\) sono clausole.\newline
+
+          Introduciamo una nuova variabile \(y\) e costruiamo \(F\) come:\[
+          \begin{aligned}
+          F\ =\ &(y \lor g_1)\ \land\ (y \lor g_2)\ \land\ \ldots\ \land\ (y \lor g_p)\ \land \\
+          &(\lnot y \lor h_1)\ \land\ (\lnot y \lor h_2)\ \land\ \ldots\ \land\ (\lnot y \lor h_q)
+          \end{aligned}
+          \]
+
+          Dobbiamo dimostrare che un assegnamento di valiri di verit\`a \(T\) soddisfa \(E\) se e solo se \(S\) soddisfa \(F\),
+          con \(S\) estensione di \(T\).\newline
+
+          \begin{enumerate}
+
+            \item \textit{Solo se}: Supponiamo \(T\) soddisfi \(E\). Siano \(T_1\) e \(T_2\) come \(E\), ma ristretti a \(E_1\) e \(E_2\).\newline
+              
+              Poich\`e \(E = E_1 \lor E_2\), \(T\) soddisfa almeno uno tra \(E_1\) e \(E_2\). Supponiamo soddisfi \(E_1\).\newline
+              
+              Allora per ipotesi induttiva \(T_1\) pu\`o essere esteso a \(S_1\) che soddisfa \(F_1\).\newline
+              
+              Costruiamo \(S\) per soddisfare \(F\) come:\newline
+              
+              \begin{enumerate}
+                \item per ogni variabile \(x\) di \(F_1\) imponiamo \(S(x) = S_1(X)\)
+                \item \(S(y)=0\), per rendere vere le clausole di \(F_2\)
+                \item per ogni variabile \(x\) di \(F_2\) che non appartiene a \(F_1\), \(S(x)=T(x)\) se definito, oppure
+                  assegnamo un valore arbitrario a \(S(x)\).\newline
+              \end{enumerate}
+
+              Con queste regole tutte le clausole di \(F\) sono soddisfatte, quindi \(S\) soddisfa \(F\). \newline
+
+              Se \(T\) soddisfa solo \(E_2\), la procedura di dimostrazione \`e simile, imponendo \(S(y) = 1\).\newline
+
+            \item \textit{Se}: Sia \(T\) un assegnamento di valori di verit\`a per \(E\), sia \(S\) un estensione di \(T\)
+              per \(F\) e supponiamo \(S\) soddisfi \(F\). Dobbiamo dimostrare che \(T\) soddisfa \(E\).\newline
+
+              Abbiamo due casi: \(S(y)\) pu\`o valere 1 o 0.\newline
+
+              Supponiamo \(S(y)=0\). Allora le clausole derivate dalle \(h\) sono vere.\newline
+
+              Dato che \(S(y)=0\), allora \(S\) deve rendere vere le \(g_i\) nelle clausole \((y\lor g_i)\) di \(F_1\).\newline
+
+              Sia \(S_1\) come \(S\) ma ristretto a \(F_1\). Dato che \(S_1\) soddisfa \(F_1\), per ipotesi induttiva \(T_1\),
+              la ristrizione di \(T\) a \(E_1\), soddisfa \(E_1\). Allora \(T\) soddisfa \(E = E_1 \lor E_2\).\newline
+
+              Il caso \(S(y)=1\) \`e simmetrico.
+
+          \end{enumerate}
+
+      \end{enumerate}
+
+  \end{description}
+
+  Dobbiamo ora dimostrare che il tempo necessario per costruire \(F\) da \(E\) \`e al massimo quadratico in \(n=|E|\).
+
+  La separazione di \(E\) in \(E_1\) e \(E_2\) e la costruzione di \(F\) da \(F_1\) e \(F_2\) richiedono tempo lineare rispetto a \(|E|\).
+
+  Sia \(dn\) un limite superiore di questo tempo, nel caso 1 e nel caso 2.
+
+  Abbiamo equazioni di ricorrenza:\[
+  \begin{aligned}
+    T(1)\ =\ &T(2) \leq e\ costante \\
+    T(n)\ \leq\ &dn + c \max_{0 \le i \le n-1}(T(i) + T(n-1-i))
+  \end{aligned}
+  \] con \(c\) tale che \(T(n) \leq cn^2\).
+
+  Per una forma del teorema master \(T(n) = O(n^2)\).
+
+  \hfill \qedsymbol
+\end{myproof}
+
+\begin{mytheo}[NP-completezza di C\SAT]
+  C\SAT\ \`e NP-completo.
+\end{mytheo}
+
+\begin{myproof}
+  C\SAT\ \`e un sottoinsieme di \SAT, percui \`e possibile adattare la NTM di \SAT\ 
+  per accettare C\SAT\ in tempo polinomiale nondeterministico. Quindi C\SAT\ \`e in \NP.
+
+  Dobbiamo ora dimostrare che esiste una riduzione polinomiale da \SAT\ a C\SAT.
+
+  Come primo passo prendiamo una generica istanza \(E\) di \SAT\ e trasformiamola in una
+  espressione \(F\) equivalente con tutte le negazioni nei letterali. Abbiamo dimostrato che ci\`o
+  \`e possibile in tempo lineare rispetto alla lunghezza di \(E\).
+
+  Dobbiamo ora trasformare \(F\) in un espressione \(G\) in CNF, tale che \(G\) \`e soddisfacibile
+  se e solo se \(F\) \`e soddisfacibile.
+
+  Per fare questo applichiamo l'ultimo teorema dimostrato, che soddisfa condizioni pi\`u forti di quelle
+  che ci occorrono in questo caso.
+
+  La costruzione di \(G\) \`e possibile in tempo polinomiale, quindi C\SAT\ \`e NP-completo.
+
+  \hfill \qedsymbol
+\end{myproof}
+
+\begin{mytheo}[NP-completessa di 3\SAT]
+  3\SAT \`e NP-completo.
+\end{mytheo}
+
+\begin{myproof}
+  Possiamo utilizzare la stessa NTM che congettura assegnamenti alle variabili di \SAT\ per
+  dimostrare che 3\SAT\ \`e in \NP.
+
+  Per dimostrare che 3\SAT \`e anche NP-completo riduciamo C\SAT\ a 3\SAT.
+
+  Data una espressione in CNF \(E = e_1 \land e_2 \land \ldots \land e_k \land\) formiamo una
+  nuova espressione \(F\) sostituendo le clausole \(e_i\) in base alla loro lunghezza:
+
+  \begin{enumerate}
+
+    \item Se \(e_i\) \`e formata da un singolo letterale \(x\), introduciamo due nuove variabili
+      \(u\) e \(v\).\newline
+
+      Sostituiamo la clausola \(e_i\) con:\[
+      (x \lor u \lor v) \land x \lor u \lor \lnot v) \land x \lor \lnot u \lor v) \land x \lor \lnot u \lor \lnot v)
+      \]
+
+      Poich\`e \(u\) e \(v\) compaiono in tutte le combinazioni, l'unico modo per soddisfare tutte le clausole \`e rendere
+      vera \(x\).\newline
+
+      Di conseguenza tutti gli assegnamenti che soddisfano \(E\), e solo quelli, si possono estendere ad assegnamenti che
+      soddisfano F.\newline
+
+    \item Sia \(e_i\) la somma di due letterali \((x \lor y)\). Introduciamo \(z\) e trasformiamo \(e_i\) come:\[
+      (x \lor y \lor z) \land (x \lor y \lor \lnot z)
+      \]
+
+      Come nel caso (1), il solo modo per soddisfare le due clausole \`e soddisfare \((x \lor y)\).\newline
+
+    \item Se \(e_i\) \`e la somma di 3 letterali, allora \`e gi\`a nella forma richiesta.\newline
+
+    \item Sia \(e_i = (x_1 \lor x_2 \lor \ldots \lor x_m)\), con \(m \geq 4\). Introduciamo \(y_1, y_2, \ldots, y_{m-3}\).
+      Sostituiamo \(e_i\) con:\[
+      \begin{aligned}
+        &(x_1\ \lor\ \ x_2\ \ \lor\ y_1)\ \land \\
+        &(x_3\ \lor\ \lnot y_1\ \lor\ y_2)\ \land \\
+        &(x_4\ \lor\ \lnot y_2\ \lor\ y_3)\ \land \\
+        &\ldots \\
+        &(x_{m-2}\ \lor\ \lnot y_{m-4}\ \lor\ y_{m-3})\ \land \\
+        &(x_{m-1}\ \lor\ \ \ x_m\ \ \ \lor\ \lnot y_{m-3})
+      \end{aligned}
+      \]
+
+      Un assegnamento \(T\) che soddisfa \(E\) deve rendere vero almeno un letterale di \(e_i\). Sia \(x_j\) questo letterale.\newline
+
+      Se dichiariamo \(y_1, y_2, \ldots, y_{j-2}\) vere e \(y_{j-1}, y_j, \ldots, y_{m-3}\) false, allora tutte le
+      clausole della nuova espressione risultano vere. Perci\`o \(T\) pu\`o essere estesa per saddisfarle.\newline
+
+      Viceversa se in \(T\) tutte le \(x\) sono false, non esiste una estensione di \(T\) che pu\`o soddisfare
+      l'espressione che abbiamo costruito.
+
+  \end{enumerate}
+
+  Abbiamo mostrato come costruire \(F\) a partire da \(E\), in modo che \(F\) sia soddisfacibili se e solo
+  se anche \(E\) lo \`e.
+
+  La costruzione impiega tempo lineare, in quanto il caso pi\`u costoso, il primo, allunga la lunghezza
+  della sotto-espressione \(e_i\) di un fattore costante (pari a \(32/3\)).
+
+  \hfill \qedsymbol
+\end{myproof}
+
+\begin{mynote}[Presentare un problema NP-completo]
+  Nel presentare nuovi problemi NP-completi adottiamo il seguente schema di definizione:
+
+  \begin{enumerate}
+  \item \textbf{Nome} del problema, spesso associato ad una abbreviazione
+  \item \textbf{Input} del problema
+  \item \textbf{Output} del problema, ossia quando deve essere ``si''
+  \item \textbf{Problema} da cui si compie la riduzione
+  \end{enumerate}
+
+\end{mynote}
+
+\begin{mydef}[Insieme indipendente]
+  Sia G un grafo non orientato. Un sottoinsieme I di nodi di G si dice indipendente se
+  nessuna coppia di nodi di I \`e collegata da un lato di G.
+\end{mydef}
+
+\begin{mydef}[Insieme indipendente massimale]
+  Un insieme indipendente di G si dice massimale se ha almeno tanti nodi quanti ogni
+  altro insieme indipendente di G.
+\end{mydef}
+
+\begin{mydef}[Problema dell'insieme indipendente, IS]
+  Definiamo il problema dell'insieme indipendente con lo schema appena indicato: 
+
+  \begin{enumerate}
+  \item \textbf{Nome}: Insieme indipendente (IS, indipendent set).
+  \item \textbf{Input}: Un grafo G e un limite inferiore \(k\), con \(k\) compreso
+    fra 1 e il numero di nodi di G.
+  \item \textbf{Output}: ``Si'' se e solo se G ha un insieme indipendente di k nodi.
+  \item \textbf{Riduzione da}: 3\SAT.
+  \end{enumerate}
+
+\end{mydef}
+
+\begin{mytheo}[NP-completezza di IS]
+  IS \`e NP-completo.
+\end{mytheo}
+
+\begin{myproof}
+  IS \`e in \NP\ perch\`e dato un grafo G e un intero \(k\), una NTM pu\`o
+  congetturare un insieme di \(k\) nodi di G e verificare se sono indipendenti,
+  in tempo polinomiale.
+
+  Riduciamo ora 3\SAT\ a IS.
+
+  Sia \(E = (e_1) \land (e_2) \land \ldots \land (e_m)\) un espressione in 3-CNF. A partire da \(E\) 
+  costruiamo un grafo G con \(3m\) nodi. A questi nodi diamo nome \([i, j]\), con \(1 \leq i \leq m\) e
+  \(j = 1,2,3\). Il nodo \([i, j]\) rappresenta il j-esimo letterale della clausola \(e_i\).
+
+  Per quanto riguarda i lati di G, seguiamo 2 regole:
+
+  \begin{enumerate}
+    
+    \item vogliamo che si possa scegliere al massimo un nodo per clausola; allora uniamo con un lato
+      tutte le coppie di nodi derivati dalla stessa clausola di E.\newline
+
+    \item dobbiamo impedire che nodi che rappresentano letterali complementari (i.e. \(x\) e \(\lnot x\))
+      siano entrambi nell'insieme indipendente; uniamo allora con un lato tutti i nodi che rappresentano
+      letterali complementari.
+
+  \end{enumerate}
+
+  Il limite \(k\), per G costruito secondo queste due regole, \`e \(m\).
+
+  La costruzione del grafo G sopra descritta \`e possibile in tempo quadratico rispetto alla lunghezza di \(E\).
+
+  Rimano ora da dimostrare che \(E\) \`e soddisfacibile se e solo se G ha un insieme indipendente di m nodi.
+
+  \begin{description}
+
+  \item[Se]: Sia I un insieme indipendente di \(m\) nodi di G.\newline
+
+    Per la regola (1), I non pu\`o contenere pi\`u di un nodo per clausola, e avendo \(m\) nodi ne ha esattamente uno per clausola.\newline
+
+    I non pu\`o nemmeno avere al suo interno nodi che rappresentano letterali complementari, perch\`e, per la regola (2), altrimenti non
+    sarebbe indipendente.\newline
+
+    Pertanto I genera un assegnamento di valori di verit\`a che soddisfa \(E\).
+
+    Definiamo \(T(x)=1\) se il nodo associato a \(x\) \`e in I, \(T(x)=0\) altrimenti.\newline
+
+    Dato che ogni clausola \`e resa vera da un letterale, \(T\) soddisfa \(E\).\newline
+
+  \item[Solo se]: Sia \(T\) un assegnamento di valori di verit\`a che soddisfa \(E\).\newline
+
+    Allora \(T\) rende vero almeno un letterale per ogni clausola di \(E\).\newline
+
+    Formiamo I scegliendo uno solo dei letterali veri da ogni clausola di \(E\).
+
+    Dobbiamo dimostrare che I \`e indipendente.\newline
+
+    Se un lato unisce due nodi derivati dalla stessa clausola, questo nodi non possono essere entrambi in I,
+    per come abbiamo sclto i nodi di I.\newline
+
+    Se un lato unisce una variabile alla sua negata, non possono trovarsi entrambe in I, perch\`e
+    abbiamo scelto solo nodi corrispondenti a letterali veri rispetto a \(T\).\newline
+
+    Quindi se \(E\) \`e soddisfacibile, allora G ha un insieme indipendente di dimensione \(m\).
+
+  \end{description}
+
+  \hfill \qedsymbol
+\end{myproof}
+
+\begin{mydef}[Copertura per nodi]
+  Si definisce copertura per nodi di un grafo G, un sottoinsieme di nodi C di G, tale che ogni
+  lato di G ha almeno un estremo in C.
+\end{mydef}
+
+\begin{mydef}[Copertura per nodi minimale]
+  Una copertura per nodi C di un grafo G si dice minimale, se ogni altra copertura di G non ha un numero
+  di nodi inferiore quelli di C.
+\end{mydef}
+
+\begin{mydef}[Problema della copertura per nodi]
+  Schema per il problema della copertura per nodi:
+
+  \begin{enumerate}
+  \item \textbf{Nome}: Copertura per nodi (NC, node cover).
+  \item \textbf{Input}: Un grafo G e un limite superiore \(k\), con \(k\) compreso
+    fra 0 e il numero di nodi di G meno uno.
+  \item \textbf{Output}: ``Si'' se e solo se G ha una copertura per nodi di non pi\`u di k nodi.
+  \item \textbf{Riduzione da}: IS.
+  \end{enumerate}
+\end{mydef}
+
+\begin{mytheo}[NP-completezza di NC]
+  NC \`e NP-completo.
+\end{mytheo}
+
+\begin{myproof}
+  NC \`e in \NP, dato che una NTM \`e in grado di congetturare un insieme di \(k\) nodi
+  di un grafo G e verificare se \`e una copertura per nodi, in tempo polinomiale.
+
+  Dobbiamo ora ridurre IS a NC.
+
+  Sappiamo gi`\a dalla teoria dei grafi che il complemento di un insieme indipendente \`e una
+  copertura per nodi per lo stesso grafo.
+
+  Dati G e \(k\), con G avente \(n\) nodi, gli elementi di una istanza di IS, siano G e \(n-k\) gli elementi dell'istanza di
+  NC che vogliamo costruire. Questa costruzione \`e possibile in tempo lineare.
+
+  Proviamo che G ha un insieme indipendente di dimensione \(k\) se e solo se G ha una copertura per nodi di dimensione \(n-k\):
+
+  \begin{description}
+
+  \item[Se]: Sia \(N\) l'insieme di nodi di G, e \(C\) la copertura per nodi di G avente dimensione \(n-k\).\newline
+
+    Affermiamo allora che \(N-C\) \`e un insieme indipendente.\newline
+
+    Per assurdo supponiamo che i nodi \(v\) e \(w\) in \(N-C\) siano uniti da un lato.\newline
+
+    Poich\`e ne \(v\) ne \(w\) sono in \(C\), il lato \((v,w)\) di G non \`e coperto da C.\newline
+    Ma questo \`e assurdo perch\`e per ipotesi \(C\) \`e una copertura per nodi di G.\newline
+
+  \item[Solo se]: Sia \(I\) un insieme indipendente di G avente \(k\) nodi.\newline
+
+    Affemiamo che \(N-I\) \`e una copertura per nodi di G di \(n-k\) nodi.\newline
+
+    Per assurdo supponiamo il lato \((v,w)\) non sia coperto da \(N-I\).\newline
+    Allora \(v\) e \(w\) sono in \(I\), ma questo \`e assurdo perch\`e \(I\) \`e indipendente per ipotesi.
+
+  \end{description}  
+
+  \hfill \qedsymbol
+\end{myproof}
+
+\end{document}
